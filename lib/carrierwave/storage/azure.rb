@@ -25,18 +25,47 @@ module CarrierWave
 
       class File
         attr_reader :path
+        BLOCK_SIZE = 2**20
 
         def initialize(uploader, connection, path)
           @uploader = uploader
           @connection = connection
           @path = path
+          @blocks = []
         end
 
         def store!(file)
-          @content = file.read
           @content_type = file.content_type
-          @connection.create_block_blob(@uploader.azure_container, @path, @content, content_type: @content_type)
+          @content = file.read
+          if is_large_file?(file)
+            store_large_file(file)
+          else
+            @connection.create_block_blob(@uploader.azure_container, @path, @content, content_type: @content_type)
+          end
           true
+        end
+
+        def is_large_file?(file)
+          file.size.to_f / BLOCK_SIZE >= 64
+        end
+
+        def store_large_file(file)
+          ::File.open(file, "rb") do |f|
+            while (block = f.read(BLOCK_SIZE))
+              block_id = random_block_id
+              @blocks << [block_id]
+              @connection.create_blob_block(@uploader.azure_container, @path, block_id, block, content_type: @content_type)
+            end
+          end
+          commit_blocks
+        end
+
+        def commit_blocks
+          @connection.commit_blob_blocks(@uploader.azure_container, @path, @blocks, content_type: @content_type)
+        end
+
+        def random_block_id
+          (0...8).map { ("a".."z").to_a[rand(26)] }.join
         end
 
         def url(options = {})
