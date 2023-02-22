@@ -50,17 +50,11 @@ module CarrierWave
         end
 
         def store_large_file(file)
-          ::File.open(file, "rb") do |f|
-            while (block = f.read(BLOCK_SIZE))
-              block_id = random_block_id
-              @blocks << [block_id]
-              @connection.create_blob_block(@uploader.azure_container, @path, block_id, block, content_type: @content_type)
-            end
+          while (block = file.read(BLOCK_SIZE))
+            block_id = random_block_id
+            @blocks << [block_id]
+            @connection.create_blob_block(@uploader.azure_container, @path, block_id, block, content_type: @content_type)
           end
-          commit_blocks
-        end
-
-        def commit_blocks
           @connection.commit_blob_blocks(@uploader.azure_container, @path, @blocks, content_type: @content_type)
         end
 
