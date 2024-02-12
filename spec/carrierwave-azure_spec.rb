@@ -10,5 +10,6 @@ describe CarrierWave::Uploader::Base do
     is_expected.to respond_to(:azure_storage_access_key)
     is_expected.to respond_to(:azure_storage_blob_host)
     is_expected.to respond_to(:azure_container)
+    is_expected.to respond_to(:azure_default_expiry)
   end
 end

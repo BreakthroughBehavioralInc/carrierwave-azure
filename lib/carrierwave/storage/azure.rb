@@ -164,7 +164,9 @@ module CarrierWave
         end
 
         def signed_url(path, options = {})
-          expiry = options[:expiry] ? (Time.now.to_i + options[:expiry].to_i) : nil
+          expiry_duration = options[:expiry] ? options[:expiry] : :azure_default_expiry
+          expiry = (Time.now.to_i + expiry_duration.to_i) if expiry_duration
+
           _options = { permissions: 'r', resource: 'b' }
           _options[:expiry] = Time.at(expiry).utc.iso8601 if expiry
           sign( path, options.merge!(_options) ).to_s
