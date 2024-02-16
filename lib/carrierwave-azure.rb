@@ -7,6 +7,7 @@ class CarrierWave::Uploader::Base
   add_config :azure_storage_access_key
   add_config :azure_storage_blob_host
   add_config :azure_container
+  add_config :azure_default_expiry
 
   configure do |config|
     config.storage_engines[:azure] = 'CarrierWave::Storage::Azure'
