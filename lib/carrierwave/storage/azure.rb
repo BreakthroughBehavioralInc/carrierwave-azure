@@ -164,7 +164,8 @@ module CarrierWave
         end
 
         def signed_url(path, options = {})
-          expiry_duration = options[:expiry] ? options[:expiry] : :azure_default_expiry
+          default_expiry = @uploader.send(:azure_default_expiry)
+          expiry_duration = options[:expiry] ? options[:expiry] : default_expiry
           expiry = (Time.now.to_i + expiry_duration.to_i) if expiry_duration
 
           _options = { permissions: 'r', resource: 'b' }
