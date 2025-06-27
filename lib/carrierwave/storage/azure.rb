@@ -96,7 +96,7 @@ module CarrierWave
         end
 
         def filename
-          URI.decode(url).gsub(/.*\/(.*?$)/, '\1')
+          URI.decode_www_form_component(url).gsub(/.*\/(.*?$)/, '\1')
         end
 
         def extension
